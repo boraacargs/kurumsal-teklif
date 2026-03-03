@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yenibiriş - Ürün ve İlan Paketleri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --yenibiris-blue: #0055A5;
+            --yenibiris-green: #7CC142;
+        }
+
+        .bg-yb-blue {
+            background-color: var(--yenibiris-blue);
+        }
+
+        .text-yb-blue {
+            color: var(--yenibiris-blue);
+        }
+
+        .bg-yb-green {
+            background-color: var(--yenibiris-green);
+        }
+
+        .text-yb-green {
+            color: var(--yenibiris-green);
+        }
+
+        .border-yb-green {
+            border-color: var(--yenibiris-green);
+        }
+
+        .border-yb-blue {
+            border-color: var(--yenibiris-blue);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 85, 165, 0.1), 0 8px 10px -6px rgba(0, 85, 165, 0.1);
+        }
+
+        .transition-all {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+        }
+
+        .tab-active {
+            background-color: var(--yenibiris-blue) !important;
+            color: white !important;
+            border-color: var(--yenibiris-blue) !important;
+            box-shadow: 0 4px 12px rgba(0, 85, 165, 0.2);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        #product-modal .modal-content-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #product-modal .modal-content-container::-webkit-scrollbar-thumb {
+            background-color: #e5e7eb;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white border-b sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <!-- Orijinal Logo -->
+                <img src="yenibiris_logo.png" alt="Yenibiriş Logo" class="h-10 w-auto"
+                    onerror="this.outerHTML='<span class=\'text-2xl font-bold tracking-tighter\'><span class=\'text-yb-blue\'>yeni</span><span class=\'text-yb-green\'>bir</span><span class=\'text-yb-blue\'>iş</span></span>'">
+            </div>
+            <nav class="flex space-x-6 md:space-x-12 font-bold items-center text-sm md:text-base">
+                <a href="javascript:void(0)" onclick="filterProducts('standart')"
+                    class="hover:text-yb-blue transition-colors">İlan Paketleri</a>
+                <a href="javascript:void(0)" onclick="filterProducts('resume_credits')"
+                    class="hover:text-yb-blue transition-colors">Özgeçmiş Kredileri</a>
+                <a href="#footer"
+                    class="bg-gray-100 text-yb-blue px-5 py-2 rounded-full hover:bg-yb-blue hover:text-white transition-all border border-transparent hover:border-yb-blue">İletişim</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-yb-blue text-white py-12 md:py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-3xl md:text-5xl font-extrabold mb-4">Kurumsal Çözüm Katalogu</h1>
+            <p class="text-lg opacity-90 max-w-2xl mx-auto mb-6">Doğru yeteneğe ulaşmanız için ihtiyacınız olan tüm ilan
+                ve özgeçmiş kredisi paketlerini buradan inceleyebilirsiniz.</p>
+
+            <div
+                class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-2 rounded-full border border-white/20 text-sm md:text-base font-medium">
+                <i class="fas fa-calendar-alt text-yb-green"></i>
+                <span>Bu teklifler sadece <span class="font-bold underline text-yb-green">Mart ayı</span> için
+                    geçerlidir.</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+
+        <div class="flex justify-center gap-4 mb-12">
+            <button onclick="filterProducts('standart')"
+                class="px-8 py-3 rounded-full border-2 border-gray-200 font-black transition-all shadow-sm text-gray-700 bg-white"
+                id="btn-standart">İlan Paketleri</button>
+            <button onclick="filterProducts('resume_credits')"
+                class="px-8 py-3 rounded-full border-2 border-gray-200 font-black transition-all shadow-sm text-gray-700 bg-white"
+                id="btn-resume_credits">Özgeçmiş Kredileri</button>
+        </div>
+
+        <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Ürünler JS ile dolacak -->
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[100] hidden items-center justify-center p-4">
+        <div
+            class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative p-6 md:p-10 shadow-2xl modal-content-container">
+            <button onclick="closeModal()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl z-10">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="modal-content" class="grid md:grid-cols-2 gap-8 md:gap-12">
+                <!-- Modal içeriği -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact & Footer -->
+    <footer id="footer" class="bg-gray-900 text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-6">Müşteri İletişim Hattı</h3>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-6">
+                    <a href="tel:08502668570"
+                        class="flex items-center gap-3 text-xl hover:text-yb-green transition-all bg-white/5 px-6 py-4 rounded-2xl border border-white/10 w-full md:w-auto justify-center">
+                        <div class="w-10 h-10 bg-yb-blue rounded-full flex items-center justify-center text-sm">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        0850 266 85 70
+                    </a>
+                    <a href="https://wa.me/908502668570" target="_blank"
+                        class="flex items-center gap-3 text-xl text-green-400 hover:text-green-300 transition-all bg-white/5 px-6 py-4 rounded-2xl border border-white/10 w-full md:w-auto justify-center">
+                        <div
+                            class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white text-sm">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        WhatsApp Hattı
+                    </a>
+                </div>
+            </div>
+
+            <hr class="border-gray-800 mb-10">
+
+            <div class="text-2xl font-bold mb-4">
+                <span class="text-blue-400">yeni</span><span class="text-yb-green">bir</span><span
+                    class="text-blue-400">iş</span>
+            </div>
+            <p class="text-gray-400 font-medium mb-8">2026 Yenibiriş Dijital İnsan Kaynakları ve Teknoloji Anonim
+                Şirketi</p>
+            <p class="opacity-40 text-xs max-w-lg mx-auto leading-relaxed italic">Bu teklifler Mart 2026 ayı sonuna
+                kadar geçerlidir. Yenibiriş, kampanya şartlarında değişiklik yapma hakkını saklı tutar.</p>
+        </div>
+    </footer>
+
+    <script>
+        const whatsappNumber = "908502668570";
+
+        const products = [
+            // İlan Paketleri
+            { id: 1, name: "1 İlan", category: "standart", price: 6550, discounted: 5900, features: ["1 İlan Yayınlama Hakkı", "60 Gün İlan Yayın Süresi", "12 Ay Üyelik Süresi", "5 Adet Özgeçmiş Kredisi"], icon: "fa-paper-plane" },
+            { id: 2, name: "3 İlan", category: "standart", price: 18650, discounted: 16800, features: ["3 İlan Yayınlama Hakkı", "60 Gün İlan Yayın Süresi", "12 Ay Üyelik Süresi", "15 Adet Özgeçmiş Kredisi"], icon: "fa-bullhorn" },
+            { id: 3, name: "5 İlan", category: "standart", price: 30250, discounted: 26500, features: ["5 İlan Yayınlama Hakkı", "60 Gün İlan Yayın Süresi", "12 Ay Üyelik Süresi", "25 Adet Özgeçmiş Kredisi"], icon: "fa-magnifying-glass-plus" },
+            { id: 4, name: "10 İlan", category: "standart", price: 58000, discounted: 51000, features: ["10 İlan Yayınlama Hakkı", "60 Gün İlan Yayın Süresi", "12 Ay Üyelik Süresi", "50 Adet Özgeçmiş Kredisi", "2 Adet Sponsorlu İlan", "2 Adet Anasayfa Öne Çıkan", "2 Adet Anasayfa Logolu İlan", "100 Adet E-Mail İletişim"], icon: "fa-briefcase" },
+            { id: 5, name: "20 İlan", category: "standart", price: 93100, discounted: 79000, features: ["20 İlan Yayınlama Hakkı", "60 Gün İlan Yayın Süresi", "12 Ay Üyelik Süresi", "100 Adet Özgeçmiş Kredisi", "4 Adet Sponsorlu İlan", "1 Firma Arama Önerisi", "4 Adet Anasayfa Öne Çıkan", "4 Adet Anasayfa Logolu İlan", "150 Adet E-Mail İletişim"], icon: "fa-layer-group" },
+            { id: 6, name: "50 İlan", category: "premium", price: 178000, discounted: 151000, features: ["50 İlan Yayınlama Hakkı", "12 Ay Üyelik Süresi", "250 Adet Özgeçmiş Kredisi", "10 Adet Sponsorlu İlan", "3 Firma Arama Önerisi", "10 Adet Anasayfa Öne Çıkan", "10 Adet Anasayfa Logolu İlan", "Otomatik İlan Güncelleme"], icon: "fa-rocket" },
+            { id: 7, name: "100 İlan", category: "premium", price: 292000, discounted: 219000, features: ["100 İlan Yayınlama Hakkı", "12 Ay Üyelik Süresi", "500 Adet Özgeçmiş Kredisi", "20 Adet Sponsorlu İlan", "5 Firma Arama Önerisi", "20 Adet Anasayfa Öne Çıkan", "20 Adet Anasayfa Logolu İlan", "Otomatik İlan Güncelleme"], icon: "fa-chart-line" },
+            { id: 8, name: "Premium 500 Yıllık", category: "premium", price: 373250, discounted: 299000, features: ["500 İlan Yayınlama Hakkı", "12 Ay Üyelik Süresi", "1000 Adet Özgeçmiş Kredisi", "40 Adet Sponsorlu İlan", "10 Firma Arama Önerisi", "40 Adet Anasayfa Öne Çıkan", "40 Adet Anasayfa Logolu İlan", "1000 Adet E-Mail Desteği"], icon: "fa-crown" },
+            { id: 9, name: "Premium 500 İki Yıllık", category: "premium", price: 648750, discounted: 519000, features: ["500 İlan (Yıllık)", "24 Ay Üyelik Süresi", "2000 Adet Özgeçmiş Kredisi", "80 Adet Sponsorlu İlan", "20 Firma Arama Önerisi", "80 Adet Anasayfa Öne Çıkan", "80 Adet Anasayfa Logolu İlan", "2000 Adet E-Mail Desteği"], icon: "fa-gem" },
+
+            // Özgeçmiş Kredileri
+            { id: 101, name: "10 Kredi", category: "resume_credits", price: 2450, discounted: 2090, features: ["10 Aday Görüntüleme Hakkı", "12 Ay Üyelik Süresi", "Özgeçmiş Havuzuna Erişim"], icon: "fa-id-card" },
+            { id: 102, name: "25 Kredi", category: "resume_credits", price: 5900, discounted: 4950, features: ["25 Aday Görüntüleme Hakkı", "12 Ay Üyelik Süresi", "Özgeçmiş Havuzuna Erişim"], icon: "fa-user-tag" },
+            { id: 103, name: "50 Kredi", category: "resume_credits", price: 9900, discounted: 8350, features: ["50 Aday Görüntüleme Hakkı", "12 Ay Üyelik Süresi", "Özgeçmiş Havuzuna Erişim"], icon: "fa-address-book" },
+            { id: 104, name: "100 Kredi", category: "resume_credits", price: 16500, discounted: 13950, features: ["100 Aday Görüntüleme Hakkı", "12 Ay Üyelik Süresi", "Özgeçmiş Havuzuna Erişim"], icon: "fa-users" },
+            { id: 105, name: "250 Kredi", category: "resume_credits", price: 39500, discounted: 33250, features: ["250 Aday Görüntüleme Hakkı", "12 Ay Üyelik Süresi", "Özgeçmiş Havuzuna Erişim"], icon: "fa-database" },
+            { id: 106, name: "500 Kredi", category: "resume_credits", price: 73600, discounted: 61500, features: ["500 Aday Görüntüleme Hakkı", "12 Ay Üyelik Süresi", "Özgeçmiş Havuzuna Erişim"], icon: "fa-server" }
+        ];
+
+        function getWhatsAppLink(packageName) {
+            const message = encodeURIComponent(`Merhaba, Yenibiriş katalogundan incelediğim "${packageName}" paketi hakkında satın alma bilgisi almak istiyorum.`);
+            return `https://wa.me/${whatsappNumber}?text=${message}`;
+        }
+
+        function renderProducts(items) {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = items.map(p => `
+                <div class="product-card bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all flex flex-col cursor-pointer" onclick="openModal(${p.id})">
+                    <div class="p-6 flex-1">
+                        <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-yb-blue text-2xl mb-4">
+                            <i class="fas ${p.icon}"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">${p.name}</h3>
+                        <p class="text-xs font-bold text-yb-blue mb-4 uppercase tracking-widest">${p.category === 'resume_credits' ? 'Özgeçmiş Kredisi' : 'İlan Paketi'}</p>
+                        <ul class="text-sm text-gray-500 space-y-2 mb-6">
+                            ${p.features.slice(0, 4).map(f => `<li><i class="fas fa-check text-yb-green mr-2"></i>${f}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 p-6 border-t">
+                        <div class="flex items-baseline gap-2 mb-2">
+                            <span class="text-sm line-through text-gray-400">₺${p.price.toLocaleString()}</span>
+                            <span class="text-2xl font-black text-yb-blue">₺${p.discounted.toLocaleString()}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="bg-white border border-gray-200 text-gray-700 font-bold py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+                                Detay
+                            </button>
+                            <a href="${getWhatsAppLink(p.name)}" target="_blank" onclick="event.stopPropagation();" class="whatsapp-btn text-center font-bold py-2 rounded-lg text-sm hover:opacity-90 flex items-center justify-center gap-1 shadow-sm">
+                                <i class="fab fa-whatsapp"></i> Satın Al
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterProducts(cat) {
+            const btns = document.querySelectorAll('[id^="btn-"]');
+            btns.forEach(b => b.classList.remove('tab-active'));
+
+            const currentBtn = document.getElementById('btn-' + cat);
+            if (currentBtn) currentBtn.classList.add('tab-active');
+
+            if (cat === 'standart') {
+                renderProducts(products.filter(p => p.category === 'standart' || p.category === 'premium'));
+            } else {
+                renderProducts(products.filter(p => p.category === cat));
+            }
+        }
+
+        function openModal(id) {
+            const p = products.find(prod => prod.id === id);
+            const modal = document.getElementById('product-modal');
+            const content = document.getElementById('modal-content');
+
+            content.innerHTML = `
+                <div class="flex flex-col items-center justify-center bg-gray-50 rounded-2xl p-8 h-full">
+                    <div class="relative w-full aspect-square flex items-center justify-center">
+                        <div class="absolute inset-0 bg-yb-blue opacity-5 rounded-full animate-pulse"></div>
+                        <div class="z-10 text-9xl text-yb-blue drop-shadow-2xl">
+                            <i class="fas ${p.icon}"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col h-full">
+                    <h2 class="text-3xl font-black text-yb-blue mb-1">${p.name}</h2>
+                    <p class="text-gray-500 mb-6 text-sm">Kurumsal İşe Alım Çözümü</p>
+                    
+                    <div class="flex-1 space-y-3 mb-8">
+                        <h4 class="font-bold text-gray-700 uppercase tracking-wider text-xs border-b pb-2">Paket Detayları</h4>
+                        <div class="grid grid-cols-1 gap-2 max-h-[350px] overflow-y-auto pr-2">
+                            ${p.features.map(f => `
+                                <div class="flex items-start gap-3 p-3 bg-white border border-gray-100 rounded-xl">
+                                    <i class="fas fa-check-circle text-yb-green text-sm mt-1"></i>
+                                    <span class="text-sm font-semibold text-gray-700">${f}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100 mt-auto">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest italic">Mart Ayı Özel</p>
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-lg line-through text-blue-300">₺${p.price.toLocaleString()}</span>
+                                    <span class="text-3xl font-black text-yb-blue">₺${p.discounted.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="${getWhatsAppLink(p.name)}" target="_blank" class="whatsapp-btn text-white w-full py-4 rounded-xl font-black shadow-lg flex items-center justify-center gap-2 hover:scale-[1.02] transition-all text-lg">
+                            <i class="fab fa-whatsapp text-2xl"></i> SATIN AL
+                        </a>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('product-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        window.onload = function () {
+            filterProducts('standart');
+        };
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('product-modal');
+            if (event.target == modal) closeModal();
+        }
+    </script>
+</body>
+
+</html>
