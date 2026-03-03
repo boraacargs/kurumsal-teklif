@@ -1,0 +1,13 @@
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editörler
+.vscode/
+.idea/
+*.swp
+*.bak
+
+# Geçici Dosyalar
+tmp/
+temp/
